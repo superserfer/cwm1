@@ -54,7 +54,7 @@ ggplot(data = time_diff, aes(x = stunden)) +
   ggtitle("Zeitunterschied Verteilung")
 
 # Generate Data from Exponential Distribution
-amount <- 100000
+amount <- 1000000
 zone1_generated <- data.frame(
   masse = rexp(amount, rate = fit_exp_masse$estimate[1]) %>% round,
   velocity = rnorm(amount, mean = fit_norm_velocity$estimate[1], sd = fit_norm_velocity$estimate[2]),
