@@ -1,6 +1,5 @@
 library(tidyverse)
 library(MASS)
-
 # Read Data
 zone1_raw <- read.csv("out_1.csv")
 
@@ -16,7 +15,7 @@ zone1 <- zone1_raw %>%
 
 # Data Wrangling for Time Difference
 time_diff <- data.frame(
-  stunden = as.numeric(diff(zone1$datetime)) / 60 / 60
+  stunden = as.numeric(diff(zone1$datetime)) / 60 / 60,
 )
 
 # Calc Distribution
@@ -54,12 +53,14 @@ ggplot(data = time_diff, aes(x = stunden)) +
   ggtitle("Zeitunterschied Verteilung")
 
 # Generate Data from Exponential Distribution
+set.seed(1234)
 amount <- 1000000
 zone1_generated <- data.frame(
-  masse = rexp(amount, rate = fit_exp_masse$estimate[1]) %>% round,
+  masse = rexp(amount, rate = fit_exp_masse$estimate[1]) %>% ceiling,
   velocity = rnorm(amount, mean = fit_norm_velocity$estimate[1], sd = fit_norm_velocity$estimate[2]),
   time_diff_stunden = rnorm(amount,mean = fit_norm_time_diff$estimate[1], sd = fit_norm_time_diff$estimate[2])
-)
+) %>% 
+  mutate(kin_energy = masse * velocity * velocity * 0.5 / 1000,)
 
 # Plot generated Data
 ggplot(data = zone1_generated, aes(x = masse)) +
@@ -80,9 +81,3 @@ ggplot(data = zone1_generated, aes(x = time_diff_stunden)) +
   ylab("Anzahl") +
   xlab("Zeit") +
   ggtitle("Zeitunterschied generiert")
-
-
-
-
-
-
