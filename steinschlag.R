@@ -44,8 +44,6 @@ ggplot(data = zone1, aes(x = velocity)) +
   xlab("velocity") +
   ggtitle("Geschwindigkeitsverteilung")
 
-print(fit_binom_time_diff)
-
 ggplot(data = time_diff, aes(x = stunden)) +
   geom_histogram(aes(y = ..density..), fill = "lightblue") +
   stat_function(fun = dnorm, args = list(mean = fit_norm_time_diff$estimate[1], sd = fit_norm_time_diff$estimate[2]), color = "black") +
