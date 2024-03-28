@@ -30,14 +30,14 @@ fit_exp_time_diff <- fitdistr(time_diff$stunden, "exponential")
 
 # Plot Mass with Exponential Distribution
 ggplot(data = zone1, aes(x = masse)) +
-  geom_histogram(aes(y = ..density..), fill = "lightblue") +
+  geom_histogram(aes(y = ..density..), fill = "lightgreen") +
   stat_function(fun = dexp, args = list(rate = fit_exp_masse$estimate[1]), color = "red") +
   ylab("Dichte") +
   xlab("Masse") +
   ggtitle("Massenverteilung")
 
 ggplot(data = zone1, aes(x = velocity)) +
-  geom_histogram(aes(y = ..density..), fill = "lightblue") +
+  geom_histogram(aes(y = ..density..), fill = "lightgreen") +
   stat_function(fun = dnorm, args = list(mean = fit_norm_velocity$estimate[1], sd = fit_norm_velocity$estimate[2]), color = "black") +
   stat_function(fun = dexp, args = list(rate = fit_exp_velocity$estimate[1]), color = "red") +
   ylab("Dichte") +
