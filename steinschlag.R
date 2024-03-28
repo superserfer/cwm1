@@ -45,7 +45,7 @@ ggplot(data = zone1, aes(x = velocity)) +
   ggtitle("Geschwindigkeitsverteilung")
 
 ggplot(data = time_diff, aes(x = stunden)) +
-  geom_histogram(aes(y = ..density..), fill = "lightblue") +
+  geom_histogram(aes(y = ..density..), fill = "lightgreen") +
   stat_function(fun = dnorm, args = list(mean = fit_norm_time_diff$estimate[1], sd = fit_norm_time_diff$estimate[2]), color = "black") +
   stat_function(fun = dexp, args = list(rate = fit_exp_time_diff$estimate[1]), color = "red") +
 
