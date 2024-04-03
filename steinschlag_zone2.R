@@ -71,7 +71,7 @@ print(velocity.gamm$estimate)
 
 
 set.seed(54321)
-amount <- 1e+06
+amount <- 1e+07
 zone_gen <- data.frame(
   masse = rgamma(amount, shape = mass.gamm$estimate[1], rate = mass.gamm$estimate[2]),
   velocity = rgamma(amount, shape = velocity.gamm$estimate[1], rate = velocity.gamm$estimate[2]),
@@ -79,4 +79,4 @@ zone_gen <- data.frame(
 ) %>% 
   mutate(kin_energy = masse * velocity * velocity * 0.5 / 1000,)
 
-hist(zone_gen$time_diff_stunden)
+hist(zone_gen$velocity)
