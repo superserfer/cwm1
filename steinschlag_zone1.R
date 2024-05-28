@@ -1,83 +1,79 @@
 library(tidyverse)
-library(MASS)
+library(fitdistrplus)
+
 # Read Data
-zone1_raw <- read.csv("out_1.csv")
+zone_raw_1 <- read.csv("out_1.csv")
 
 # Data Wrangling
-zone1 <- zone1_raw %>% 
-  filter(Datum != "") %>% 
+zone_1 <- zone_raw_1 %>% 
+  filter(Datum != "",) %>% 
   mutate(
     datetime = ymd_hm(paste(Datum, Uhrzeit, sep = " ")), 
     masse = Masse..kg., 
     velocity = Geschwindigkeit..m.s.) %>% 
   arrange(datetime) %>% 
+  filter(masse > 0) %>% 
   dplyr::select(datetime, masse, velocity)
 
 # Data Wrangling for Time Difference
-time_diff <- data.frame(
-  stunden = as.numeric(diff(zone1$datetime)) / 60 / 60,
-)
+time_diff_1 <- data.frame(
+  stunden = as.numeric(diff(zone_1$datetime)))
 
 # Calc Distribution
-fit_exp_masse <- fitdistr(zone1$masse, "exponential")
+mass.norm_1 <- fitdist(zone_1$masse, "norm")
+mass.unif_1 <- fitdist(zone_1$masse, "unif")
+mass.lnorm_1 <- fitdist(zone_1$masse, "lnorm")
+mass.legend_1 <- c("Normal", "Unif", "Lognormal")
 
-fit_norm_velocity <- fitdistr(zone1$velocity, "normal")
-fit_exp_velocity <- fitdistr(zone1$velocity, "exponential")
+velocity.norm_1 <- fitdist(zone_1$velocity, "norm")
+velocity.expo_1 <- fitdist(zone_1$velocity, "exp")
+velocity.unif_1 <- fitdist(zone_1$velocity, "unif")
+velocity.lnorm_1 <- fitdist(zone_1$velocity, "lnorm")
+velocity.gamm_1 <- fitdist(zone_1$velocity, "gamma")
+velocity.legend_1 <- c("Normal", "Exponential", "Unif", "Lognormal", "Gamma")
 
-fit_norm_time_diff <- fitdistr(time_diff$stunden, "normal")
-fit_exp_time_diff <- fitdistr(time_diff$stunden, "exponential")
 
-# Plot Mass with Exponential Distribution
-ggplot(data = zone1, aes(x = masse)) +
-  geom_histogram(aes(y = ..density..), fill = "lightgreen") +
-  stat_function(fun = dexp, args = list(rate = fit_exp_masse$estimate[1]), color = "red") +
-  ylab("Dichte") +
-  xlab("Masse") +
-  ggtitle("Massenverteilung")
+time_diff.norm_1 <- fitdist(time_diff_1$stunden, "norm")
+time_diff.unif_1 <- fitdist(time_diff_1$stunden, "unif")
+time_diff.legend_1 <- c("Normal", "Unif")
 
-ggplot(data = zone1, aes(x = velocity)) +
-  geom_histogram(aes(y = ..density..), fill = "lightgreen") +
-  stat_function(fun = dnorm, args = list(mean = fit_norm_velocity$estimate[1], sd = fit_norm_velocity$estimate[2]), color = "black") +
-  stat_function(fun = dexp, args = list(rate = fit_exp_velocity$estimate[1]), color = "red") +
-  ylab("Dichte") +
-  xlab("velocity") +
-  ggtitle("Geschwindigkeitsverteilung")
+# Plot different Distributions for mass
+denscomp(list(mass.norm_1, mass.unif_1, mass.lnorm_1), legendtext = mass.legend_1, plotstyle = "ggplot")
+descdist(zone_1$mass, boot = 10000, discrete = FALSE)
 
-ggplot(data = time_diff, aes(x = stunden)) +
-  geom_histogram(aes(y = ..density..), fill = "lightgreen") +
-  stat_function(fun = dnorm, args = list(mean = fit_norm_time_diff$estimate[1], sd = fit_norm_time_diff$estimate[2]), color = "black") +
-  stat_function(fun = dexp, args = list(rate = fit_exp_time_diff$estimate[1]), color = "red") +
+# Die passen am besten (gamma oder exponential)
 
-  ylab("Dichte") +
-  xlab("Zeitunterschied") +
-  ggtitle("Zeitunterschied Verteilung")
+"Gamma oder exponential
+"
+# Plot different Distributions for velocity
+denscomp(list(velocity.norm_1, velocity.expo_1, velocity.unif_1, velocity.lnorm_1, velocity.gamm_1), legendtext = velocity.legend_1, plotstyle = "ggplot")
+descdist(zone_1$velocity, boot = 10000, discrete = FALSE)
 
-# Generate Data from Exponential Distribution
-set.seed(1234)
-amount <- 1000000
-zone1_generated <- data.frame(
-  masse = rexp(amount, rate = fit_exp_masse$estimate[1]) %>% ceiling,
-  velocity = rnorm(amount, mean = fit_norm_velocity$estimate[1], sd = fit_norm_velocity$estimate[2]),
-  time_diff_stunden = rnorm(amount,mean = fit_norm_time_diff$estimate[1], sd = fit_norm_time_diff$estimate[2])
+# Die passen am besten (Normalverteiilung)
+
+"Normalverteiilung"
+
+# Plot different Distributions for velocity
+denscomp(list(time_diff.norm_1, time_diff.unif_1), legendtext = time_diff.legend_1, plotstyle = "ggplot")
+descdist(time_diff_1$stunden, boot = 10000)
+
+# Die passen am besten (Gamma)
+
+"gamma"
+
+
+#der Teil muss im steinschlag 1 nochmals überschaut werden
+
+set.seed(54321)
+amount <- 1e+06
+zone_gen_1 <- data.frame(
+  masse = rgamma(amount, shape = mass.gamm_1$estimate[1], rate = mass.gamm_1$estimate[2]),
+  velocity = rgamma(amount, shape = velocity.gamm_1$estimate[1], rate = velocity.gamm_1$estimate[2]),
+  time_diff_stunden = rgamma(amount, shape = time_diff.gamm_1$estimate[1], rate = time_diff.gamm_1$estimate[2])
 ) %>% 
   mutate(kin_energy = masse * velocity * velocity * 0.5 / 1000,)
 
-# Plot generated Data
-ggplot(data = zone1_generated, aes(x = masse)) +
-  geom_histogram(bins = 100) +
-  ylab("Anzahl") +
-  xlab("Masse") +
-  ggtitle("Masse generiert")
+hist(zone_gen_1$time_diff_stunden)
 
-ggplot(data = zone1_generated, aes(x = velocity)) +
-  geom_histogram() +
-  ylab("Anzahl") +
-  xlab("Velocity") +
-  ggtitle("Geschwindigkeit generiert")
 
-# Plot generated Data
-ggplot(data = zone1_generated, aes(x = time_diff_stunden)) +
-  geom_histogram() +
-  ylab("Anzahl") +
-  xlab("Zeit") +
-  ggtitle("Zeitunterschied generiert")
+

@@ -21,8 +21,8 @@ time_diff <- data.frame(
 )
 
 # Calc Distribution
-mass.expo <- fitdist(zone$masse, "exp")
 mass.norm <- fitdist(zone$masse, "norm")
+mass.expo <- fitdist(zone$masse, "exp")
 mass.unif <- fitdist(zone$masse, "unif")
 mass.lnorm <- fitdist(zone$masse, "lnorm")
 mass.gamm <- fitdist(zone$masse, "gamma")
@@ -71,7 +71,7 @@ print(velocity.gamm$estimate)
 
 
 set.seed(54321)
-amount <- 1e+07
+amount <- 1e+06
 zone_gen <- data.frame(
   masse = rgamma(amount, shape = mass.gamm$estimate[1], rate = mass.gamm$estimate[2]),
   velocity = rgamma(amount, shape = velocity.gamm$estimate[1], rate = velocity.gamm$estimate[2]),
@@ -79,4 +79,4 @@ zone_gen <- data.frame(
 ) %>% 
   mutate(kin_energy = masse * velocity * velocity * 0.5 / 1000,)
 
-hist(zone_gen$velocity)
+hist(zone_gen$time_diff_stunden)
