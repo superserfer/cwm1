@@ -1,5 +1,6 @@
 library(tidyverse)
 library(fitdistrplus)
+library(univariateML)
 
 # Read Data
 zone_raw_1 <- read.csv("out_1.csv")
@@ -23,44 +24,61 @@ time_diff_1 <- data.frame(
 mass.norm_1 <- fitdist(zone_1$masse, "norm")
 mass.unif_1 <- fitdist(zone_1$masse, "unif")
 mass.lnorm_1 <- fitdist(zone_1$masse, "lnorm")
-mass.legend_1 <- c("Normal", "Unif", "Lognormal")
+mass.weibull_1 <- fitdist(zone_1$masse, "weibull")
+mass.legend_1 <- c("Normal", "Unif", "Lognormal","Weibull")
 
 velocity.norm_1 <- fitdist(zone_1$velocity, "norm")
 velocity.expo_1 <- fitdist(zone_1$velocity, "exp")
 velocity.unif_1 <- fitdist(zone_1$velocity, "unif")
 velocity.lnorm_1 <- fitdist(zone_1$velocity, "lnorm")
 velocity.gamm_1 <- fitdist(zone_1$velocity, "gamma")
-velocity.legend_1 <- c("Normal", "Exponential", "Unif", "Lognormal", "Gamma")
+velocity.weibull_1 <- fitdist(zone_1$velocity, "weibull")
+velocity.legend_1 <- c("Normal", "Exponential", "Unif", "Lognormal", "Gamma", "Weibull")
 
 
 time_diff.norm_1 <- fitdist(time_diff_1$stunden, "norm")
 time_diff.unif_1 <- fitdist(time_diff_1$stunden, "unif")
-time_diff.legend_1 <- c("Normal", "Unif")
+time_diff.legend_1 <- c("Normal", "Unif", "Weibull")
 
 # Plot different Distributions for mass
-denscomp(list(mass.norm_1, mass.unif_1, mass.lnorm_1), legendtext = mass.legend_1, plotstyle = "ggplot")
+denscomp(list(mass.norm_1, mass.unif_1, mass.lnorm_1, mass.weibull_1), legendtext = mass.legend_1, plotstyle = "ggplot")
 descdist(zone_1$mass, boot = 10000, discrete = FALSE)
 
-# Die passen am besten (gamma oder exponential)
+# Die passen am besten
 
-"Gamma oder exponential
-"
+plot(mass.lnorm_1)
+plot(mass.weibull_1)
+
+model_select(zone_1$masse)
+
+#Weibull passt besser
+
 # Plot different Distributions for velocity
-denscomp(list(velocity.norm_1, velocity.expo_1, velocity.unif_1, velocity.lnorm_1, velocity.gamm_1), legendtext = velocity.legend_1, plotstyle = "ggplot")
+denscomp(list(velocity.norm_1, velocity.expo_1, velocity.unif_1, velocity.lnorm_1, velocity.gamm_1, velocity.weibull_1), legendtext = velocity.legend_1, plotstyle = "ggplot")
 descdist(zone_1$velocity, boot = 10000, discrete = FALSE)
 
-# Die passen am besten (Normalverteiilung)
+# Die passen am besten
 
-"Normalverteiilung"
+plot(velocity.norm_1)
+plot(velocity.weibull_1)
+plot(velocity.expo_1)
+plot(velocity.gamm_1)
+plot(velocity.lnorm_1)
+
+#Normalverteilung passt am besten
 
 # Plot different Distributions for velocity
 denscomp(list(time_diff.norm_1, time_diff.unif_1), legendtext = time_diff.legend_1, plotstyle = "ggplot")
 descdist(time_diff_1$stunden, boot = 10000)
 
-# Die passen am besten (Gamma)
+# Die passen am besten 
+plot(time_diff.norm_1)
+plot(time_diff.unif_1)
 
-"gamma"
 
+model_select(time_diff_1$stunden)
+
+#unklar
 
 #der Teil muss im steinschlag 1 nochmals überschaut werden
 
@@ -74,6 +92,3 @@ zone_gen_1 <- data.frame(
   mutate(kin_energy = masse * velocity * velocity * 0.5 / 1000,)
 
 hist(zone_gen_1$time_diff_stunden)
-
-
-
