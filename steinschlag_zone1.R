@@ -16,9 +16,12 @@ zone_1 <- zone_raw_1 %>%
   filter(masse > 0) %>% 
   dplyr::select(datetime, masse, velocity)
 
+
 # Data Wrangling for Time Difference
 time_diff_1 <- data.frame(
-  stunden = as.numeric(diff(zone_1$datetime)))
+  stunden = as.numeric(diff(zone_1$datetime))
+  ) %>% 
+  mutate(stunden = stunden /60/60) # Um stunden zu erhalten
 
 # Calc Distribution
 mass.norm_1 <- fitdist(zone_1$masse, "norm")
@@ -38,7 +41,8 @@ velocity.legend_1 <- c("Normal", "Exponential", "Unif", "Lognormal", "Gamma", "W
 
 time_diff.norm_1 <- fitdist(time_diff_1$stunden, "norm")
 time_diff.unif_1 <- fitdist(time_diff_1$stunden, "unif")
-time_diff.legend_1 <- c("Normal", "Unif", "Weibull")
+time_diff.expo_1 <- fitdist(time_diff_1$stunden, "exp")
+time_diff.legend_1 <- c("Normal", "Unif", "Expo")
 
 # Plot different Distributions for mass
 denscomp(list(mass.norm_1, mass.unif_1, mass.lnorm_1, mass.weibull_1), legendtext = mass.legend_1, plotstyle = "ggplot")
@@ -47,11 +51,13 @@ descdist(zone_1$mass, boot = 10000, discrete = FALSE)
 # Die passen am besten
 
 plot(mass.lnorm_1)
+plot(mass.unif_1)
 plot(mass.weibull_1)
+plot(mass.norm_1)
 
 model_select(zone_1$masse)
 
-#Weibull passt besser
+#lognormal  besser
 
 # Plot different Distributions for velocity
 denscomp(list(velocity.norm_1, velocity.expo_1, velocity.unif_1, velocity.lnorm_1, velocity.gamm_1, velocity.weibull_1), legendtext = velocity.legend_1, plotstyle = "ggplot")
@@ -65,20 +71,21 @@ plot(velocity.expo_1)
 plot(velocity.gamm_1)
 plot(velocity.lnorm_1)
 
-#Normalverteilung passt am besten
+model_select(zone_1$velocity)#Normalverteilung passt am besten
 
 # Plot different Distributions for velocity
-denscomp(list(time_diff.norm_1, time_diff.unif_1), legendtext = time_diff.legend_1, plotstyle = "ggplot")
+denscomp(list(time_diff.norm_1, time_diff.unif_1, time_diff.expo_1), legendtext = time_diff.legend_1, plotstyle = "ggplot")
 descdist(time_diff_1$stunden, boot = 10000)
 
 # Die passen am besten 
 plot(time_diff.norm_1)
 plot(time_diff.unif_1)
+plot(time_diff.expo_1)
 
 
 model_select(time_diff_1$stunden)
 
-#unklar
+#exponentiell model
 
 #der Teil muss im steinschlag 1 nochmals überschaut werden
 
@@ -90,5 +97,3 @@ zone_gen_1 <- data.frame(
   time_diff_stunden = rgamma(amount, shape = time_diff.gamm_1$estimate[1], rate = time_diff.gamm_1$estimate[2])
 ) %>% 
   mutate(kin_energy = masse * velocity * velocity * 0.5 / 1000,)
-
-hist(zone_gen_1$time_diff_stunden)

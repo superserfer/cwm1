@@ -17,11 +17,13 @@ zone <- zone_raw %>%
   dplyr::select(datetime, masse, velocity)
 
 # Data Wrangling for Time Difference
+
 time_diff <- data.frame(
   stunden = as.numeric(diff(zone$datetime))
 )
 
 # Calc Distribution
+
 mass.norm <- fitdist(zone$masse, "norm")
 mass.expo <- fitdist(zone$masse, "exp")
 mass.unif <- fitdist(zone$masse, "unif")
@@ -44,30 +46,31 @@ time_diff.expo <- fitdist(time_diff$stunden, "exp")
 time_diff.unif <- fitdist(time_diff$stunden, "unif")
 time_diff.lnorm <- fitdist(time_diff$stunden, "lnorm")
 time_diff.gamm <- fitdist(time_diff$stunden, "gamma")
-time_diff.weibull <- fitdist(zone$velocity, "weibull")
+time_diff.weibull <- fitdist(time_diff$stunden, "weibull")
 time_diff.legend <- c("Normal", "Exponential", "Unif", "Lognormal", "Gamma", "Weibull")
 
 # Plot different Distributions for mass
 denscomp(list(mass.norm, mass.expo, mass.unif, mass.lnorm, mass.gamm, mass.weibull), legendtext = mass.legend, plotstyle = "ggplot")
 descdist(zone$mass, boot = 10000, discrete = FALSE)
 
-# Die passen am besten (gamma)
+# Die passen am besten 
 plot(mass.expo)
 plot(mass.gamm)
 plot(mass.weibull)
+plot(mass.lnorm)
 
-#expo passt am besten
 
 #Check
 
-model_select(zone$masse)
+model_select(zone$masse) # Gemäss univariateML package passt die exponentielle Verteilung am besten, da aber das Gewicht den Wert 0 nicht annhemen kann, haben wir uns für weibull entschieden (fast identdisch)
 
 # Plot different Distributions for velocity
-denscomp(list(velocity.norm, velocity.expo, velocity.unif, velocity.lnorm, velocity.gamm), legendtext = velocity.legend, plotstyle = "ggplot")
+denscomp(list(velocity.norm, velocity.expo, velocity.unif, velocity.lnorm, velocity.gamm, velocity.weibull), legendtext = velocity.legend, plotstyle = "ggplot")
 descdist(zone$velocity, boot = 10000, discrete = FALSE)
 
-# Die passen am besten (gamma)
+# Die passen am besten
 plot(velocity.norm)
+plot(velocity.unif)
 plot(velocity.lnorm)
 plot(velocity.gamm)
 plot(velocity.weibull)
@@ -79,16 +82,19 @@ plot(velocity.weibull)
 model_select(zone$velocity)
 
 # Plot different Distributions for velocity
-denscomp(list(time_diff.norm, time_diff.expo, time_diff.unif, time_diff.lnorm, time_diff.gamm), legendtext = time_diff.legend, plotstyle = "ggplot")
+
+denscomp(list(time_diff.norm, time_diff.expo, time_diff.unif, time_diff.lnorm, time_diff.gamm, time_diff.weibull), legendtext = time_diff.legend, plotstyle = "ggplot")
 descdist(time_diff$stunden, boot = 10000)
 
-# Die passen am besten (gamma)
+# Die passen am besten 
+
 plot(time_diff.norm)
 plot(time_diff.lnorm)
 plot(time_diff.gamm)
 plot(time_diff.weibull)
+plot(time_diff.expo)
 
-#Gamma passt am besten
+#gamma passt am besten
 
 #Check
 
